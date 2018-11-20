@@ -1,0 +1,1 @@
+Get-ADGroupMember -Identity SG_Olympus_PRD_App_Admin | Format-Table
