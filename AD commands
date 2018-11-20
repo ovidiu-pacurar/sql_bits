@@ -1,1 +1,20 @@
 Get-ADGroupMember -Identity YOUR_GROUP | Select-Object SamAccountName | foreach { $_.SamAccountName }
+
+
+
+ $sourceGroup = "YOUR GROUP HERE"
+ 
+ $users = Get-ADGroupMember -Identity $sourceGroup | Select-Object SamAccountName | foreach { $_.SamAccountName } | sort 
+
+ $membership = $users | ForEach-Object {
+    $user = $_
+    Get-ADPrincipalGroupMembership $user | select @{N='user'; E={$user}},@{N='group'; E={$_.name}} 
+ }  
+
+ $users | ForEach-Object {
+    $user = $_
+     @{
+        "user" = $user
+        "memberOf" = $membership | Where-Object {$_.user -eq $user } | foreach { $_.group }
+    }
+ } | ConvertTo-Json
