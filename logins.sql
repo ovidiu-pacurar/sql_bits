@@ -9,10 +9,20 @@ from sys.sql_logins
 order by 1
 
 
--- GENERATE SID
+-- GENERATE SIDs
 
-begin tran
-create login TEMP_SID_SOURCE with password = 0x02009D01C8515D9A666F3729FC219FAF1974EB4AFF55CD5A6655902BB39AB877303D5C16AD8FF5D6B8E20A16AB5007EA496262933CA320EA0C33E103A1ACC7AAB746B7BA847E hashed;
-select sid from sys.sql_logins where name= 'TEMP_SID_SOURCE';
-drop login TEMP_SID_SOURCE;
-rollback tran
+declare @count int = 5;
+declare @list table(
+	val varbinary(max)
+);
+while(@count > 0)
+	begin
+	begin tran
+		create login TEMP_SID_SOURCE with password = 0x02009D01C8515D9A666F3729FC219FAF1974EB4AFF55CD5A6655902BB39AB877303D5C16AD8FF5D6B8E20A16AB5007EA496262933CA320EA0C33E103A1ACC7AAB746B7BA847E hashed;
+		insert into @list
+			select sid from sys.sql_logins where name= 'TEMP_SID_SOURCE';
+		drop login TEMP_SID_SOURCE;
+	rollback tran
+	SET @count = @count - 1;
+end
+select * from @list;
